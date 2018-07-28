@@ -6,8 +6,7 @@ class String
 {
 private:
 	char *buf;
-	size_t len = 100;
-	size_t maxlen = 2 * len;
+	size_t len;
 	String(size_t);
 public:	
 	String(const String&);
@@ -16,19 +15,23 @@ public:
 	~String();
 	String& operator=(const String&);
 	String& operator=(String&&);
+	String  operator+(const String&);
+	char&   operator[](size_t);
+	bool    operator==(const String&);
+	bool    operator!=(const String&);
+	char*   operator()(char*);
+	size_t  operator()(int);
+	operator char* ();
 	char *get() const;
-	size_t getMaxLen() const;
+
 };
-size_t String::getMaxLen() const
-{
-	return maxlen;
-}
-String::String(size_t len) :maxlen(0)
+
+String::String(size_t len) 
 {
 	this->len = len;
 	buf = new char[len];
 	*buf = 0;
-	cout << "c " << this << endl;
+	//cout << "c " << this << endl;
 }
 
 String::String(const char * str) :String(strlen(str) + 1)
@@ -43,7 +46,6 @@ String::String(String && s)
 {
 	buf = s.buf;
 	len = s.len;
-	maxlen = s.maxlen;
 	s.buf = nullptr;
 	s.len = 0;
 }
@@ -54,7 +56,6 @@ String& String::operator=(String&& s)
 		delete[]buf;
 		buf = s.buf;
 		len = s.len;
-		maxlen = s.maxlen;
 		s.buf = nullptr;
 		s.len = 0;
 	}
@@ -68,16 +69,45 @@ String& String::operator=(const String& s)
 		delete[] buf;
 		len = s.len;
 		buf = new char[len];
-		maxlen = s.maxlen;
 		strcpy(buf, s.buf);
 	}
 	return *this;
 }
-
+String String::operator+(const String& s)
+{
+	String result(len + s.len + 1);
+	strcpy(result.buf, buf);
+	strcat(result.buf, s.buf);
+	return result;
+}
+char&  String::operator[](size_t i)
+{
+	return buf[i];
+}
+bool    String::operator==(const String& s)
+{
+	return (bool)!strcmp(buf, s.buf);
+}
+bool    String::operator!=(const String& s)
+{
+	return !(*this == s);
+}
+char*   String::operator()(char*)
+{
+	return buf;
+}
+size_t   String::operator()(int)
+{
+	return len;
+}
+String::operator char* ()
+{
+	return buf;
+}
 String::~String()
 {
 	delete[]buf;
-	cout <<"d "<< this << endl;
+	//cout <<"d "<< this << endl;
 }
 
 char* String::get() const
@@ -88,6 +118,11 @@ char* String::get() const
 void print(String &s)
 {
 	cout << s.get() << endl;
+}
+
+ostream& operator<< (ostream& out, const String& s)
+{
+	return out << s.get();
 }
 
 int main()
@@ -102,6 +137,13 @@ int main()
 
 	print(a);
 	print(b);
-	cout << a.getMaxLen() << endl;
+	print(a + b);
+	cout << a[(size_t)0] << endl;
+	char *p = a("");
+	size_t len = a(0);
+	cout << p << " "<<len<< endl;
+	cout << (char*)b << endl;
+
+	cout << a << endl;
 	return 0;
 }
